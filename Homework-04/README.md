@@ -4,7 +4,11 @@
 
 ### Could the answer to Q1 allow an optimisation?
 
+asd
+
 ### Can you trigger a revert in the init code in Remix?
+
+Yes, the init code first sets up the free memory pointer nd then it checks for wei being sent with the transaction and `would revert` if the constructor is not payable.
 
 ### Write some Yul to
 
