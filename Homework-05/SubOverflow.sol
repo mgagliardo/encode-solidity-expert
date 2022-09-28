@@ -7,14 +7,17 @@ contract SubOverflow {
     // otherwise it should return x - y
     function subtract(uint256 x, uint256 y) public pure returns (uint256) {
         // Write assembly code that handles overflows
-        require(x > y); // Ensure x > y
         assembly {
-            let result := sub(x, y) // x - y
-            if lt(256, result) {
-                revert(0, 0)
+            let z := sub(x, y)
+            let k := add(x, y)
+            switch lt(z, k)
+            case  true {
+                mstore(0x80, z)
             }
-            mstore(0x0, result) // store result in memory
-            return(0x0, 256)
+            default {
+                mstore(0x80, 0)
+            }
+            return(0x80, 32)
         }
     }
 }
