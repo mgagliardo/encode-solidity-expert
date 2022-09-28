@@ -2,9 +2,11 @@
 
 ### Look at the example of init code in today's notes. [See gist](https://gist.github.com/extropyCoder/4243c0f90e6a6e97006a31f5b9265b94). When we do the CODECOPY operation, what are we overwriting? (debugging this in Remix might help here)
 
+We are overwriting the Memory as CODECOPY copies bytes from the contract into memory.
+
 ### Could the answer to Q1 allow an optimisation?
 
-asd
+WIP
 
 ### Can you trigger a revert in the init code in Remix?
 
@@ -20,9 +22,7 @@ Yes, the init code first sets up the free memory pointer nd then it checks for w
 
 The Yellow Paper mentions an EVM opcode EXTCODECOPY which copies an account's code to memory, so one usecase for `EXTCODECOPY` is to access the code of a contract from another contract.
 
-The following example provides library code to access the code of another contract and load it into a bytes variable. This is not possible at all with "plain Solidity" and the idea is that assembly libraries will be used to enhance the language in such ways.
-
-The following example provides library code to access the code of another contract and load it into a bytes variable. This is possible with “plain Solidity” too, by using <address>.code. But the point here is that reusable assembly libraries can enhance the Solidity language without a compiler change.
+The following example provides library code to access the code of another contract and load it into a bytes variable. This is possible with “plain Solidity” too, by using `address.code`, but the point here is that reusable assembly libraries can enhance the Solidity language without a compiler change.
 
 ```
 library GetCode {
