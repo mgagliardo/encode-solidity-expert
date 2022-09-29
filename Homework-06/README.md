@@ -8,6 +8,7 @@ Check code under [HW6EX1.sol](./HW6EX1.sol)
 
 It's a runtime bytecode for a contract that mutates into two child contracts and then self destructs.
 The first child contract receives the call value while the second child contract recevies the remaining balance.
+The two contracts that are created also receive the same code as the first contract, but being executing bytecode instead of initbytecode
 
 ```
 #       ┏━━━━━━━━━━━━━━━━━━━ push1 RUNTIME_BYTECODE_LEN

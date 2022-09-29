@@ -18,21 +18,8 @@ Yes, the init code first sets up the free memory pointer nd then it checks for w
 2. store the result at the next free memory location.
 3. (optional) write this again in opcodes
 
-```
-// SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.7;
-
-contract WriteSomeYul {
-    function add() external pure returns (uint256) {
-        assembly {
-            let ptr := mload(0x40)       // Get next free memory pointer
-            mstore(ptr, add(0x07, 0x07)) // Sum 0x07 and 0x08
-            return(ptr, 32)
-        }
-    }
-}
-```
+- Check [Add.sol](./Add.sol).
+- In Opcodes, check [AddOpcodes.sol](./AddOpcodes.sol)
 
 ### Can you think of a situation where the opcode EXTCODECOPY is used?
 
@@ -43,25 +30,24 @@ The following example provides library code to access the code of another contra
 ```
 
 library GetCode {
-function at(address \_addr) returns (bytes o_code) {
-assembly {
-// retrieve the size of the code, this needs assembly
-let size := extcodesize(\_addr)
-// allocate output byte array - this could also be done without assembly
-// by using o_code = new bytes(size)
-o_code := mload(0x40)
-// new "memory end" including padding
-mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), bnot(0x1f))))
-// store length in memory
-mstore(o_code, size)
-// actually retrieve the code, this needs assembly
-extcodecopy(\_addr, add(o_code, 0x20), 0, size)
-}
-}
-}
+    function at(address \_addr) returns (bytes o_code) {
+        assembly {
+            // retrieve the size of the code, this needs assembly
+            let size := extcodesize(\_addr)
+            
+            // allocate output byte array - this could also be done without assembly
+            // by using o_code = new bytes(size)
+            o_code := mload(0x40)
 
-```
-
-```
-
+            // new "memory end" including padding
+            mstore(0x40, add(o_code, and(add(add(size, 0x20), 0x1f), bnot(0x1f))))
+            
+            // store length in memory
+            mstore(o_code, size)
+            
+            // actually retrieve the code, this needs assembly
+            extcodecopy(\_addr, add(o_code, 0x20), 0, size)
+        }
+    }
+}
 ```
