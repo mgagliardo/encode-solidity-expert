@@ -1,4 +1,4 @@
-# Homework 6
+# Week 02 - Homework 06
 
 ### Create a Solidity contract with one function. The solidity function should return the amount of ETH that was passed to it, and the function body should be written in assembly
 
