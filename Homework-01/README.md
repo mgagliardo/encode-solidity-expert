@@ -25,9 +25,10 @@ Is a type of attack in which the malicious entity intercepts and then repeats a 
 
 The 2 pieces of information to prevent it are:
 
-* Private keys (i.e. attackers trying to replay a Tx that uses a privatekey that does not exist or does not belong to mainnet).
+* Account nonce (i.e. attackers trying to replay a Tx that uses a privatekey that does not exist or does not belong to mainnet).
 * Since [EIP155](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155md) transactions incorporate the `chainID` to the transaction signature.
 
 ## How do we know who called a view function?
 
-Since view transactions are not saved on the blockchain, we can use [Solidity Events](https://blog.chain.link/events-and-logging-in-solidity/)
+* `msg.sender` is normally the usecase but it is not validated. This means the message is not signed and so the value (i.e. in `view` functions) can not be validated.
+* Another way would be using [Solidity Events](https://blog.chain.link/events-and-logging-in-solidity/)
