@@ -119,7 +119,7 @@ contract GasContract is Ownable, Constants {
     }
 
     function checkForAdmin(address _user) public view returns (bool) {
-        for (uint256 i = 0; i < administrators.length; i++) {
+        for (uint256 i = 0; i < 5; i++) {
             if (administrators[i] == _user) {
                 return true;
             }
@@ -127,19 +127,12 @@ contract GasContract is Ownable, Constants {
         return false;
     }
 
-    function balanceOf(address _user) public view returns (uint256 balance_) {
-        uint256 balance = balances[_user];
-        return balance;
+    function balanceOf(address _user) public view returns (uint256) {
+        return balances[_user];
     }
 
-    function getTradingMode() public view returns (bool mode_) {
-        bool mode = false;
-        if (tradeFlag == 1 || dividendFlag == 1) {
-            mode = true;
-        } else {
-            mode = false;
-        }
-        return mode;
+    function getTradingMode() public view returns (bool) {
+        return (tradeFlag == 1 || dividendFlag == 1);
     }
 
     function addHistory(address _updateAddress, bool _tradeMode)
@@ -159,7 +152,7 @@ contract GasContract is Ownable, Constants {
     }
 
     function getPayments(address _user)
-        public
+        external
         view
         returns (Payment[] memory payments_)
     {
@@ -197,7 +190,7 @@ contract GasContract is Ownable, Constants {
         uint256 _ID,
         uint256 _amount,
         PaymentType _type
-    ) public onlyAdminOrOwner {
+    ) external onlyAdminOrOwner {
         require(_ID > 0, "ID must be greater than 0");
         require(_amount > 0, "Amount must be greater than 0");
         require(_user != address(0), "Administrator can't be zero address");
@@ -223,7 +216,7 @@ contract GasContract is Ownable, Constants {
     }
 
     function addToWhitelist(address _userAddrs, uint256 _tier)
-        public
+        external
         onlyAdminOrOwner
     {
         require(_tier < 255, "Tier level should not be greater than 255");
@@ -255,7 +248,7 @@ contract GasContract is Ownable, Constants {
         address _recipient,
         uint256 _amount,
         ImportantStruct memory _struct
-    ) public checkIfWhiteListed(msg.sender) {
+    ) external checkIfWhiteListed(msg.sender) {
         address senderOfTx = msg.sender;
         require(
             balances[senderOfTx] >= _amount,
