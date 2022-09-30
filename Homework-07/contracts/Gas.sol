@@ -11,6 +11,7 @@ contract Constants {
 }
 
 contract GasContract is Ownable, Constants {
+    error NameMustBeLt9();
     error InsufficientBalance();
     error NeitherAdminNorOwner();
     error AmountToSendMustBeGt3();
@@ -39,7 +40,6 @@ contract GasContract is Ownable, Constants {
         address recipient;
         address admin; // administrators address
         uint256 amount;
-        bool isUpdated;
     }
 
     struct History {
@@ -139,15 +139,9 @@ contract GasContract is Ownable, Constants {
         uint256 _amount,
         string calldata _name
     ) external {
-        require(
-            balances[msg.sender] >= _amount,
-            "Sender has insufficient Balance"
-        );
-        require(
-            bytes(_name).length < 9,
-            "Recipient name too long. Must be < 9 characters"
-        );
-        balances[msg.sender] = balances[msg.sender] - _amount;
+        if (balances[msg.sender] < _amount) revert InsufficientBalance();
+        if (bytes(_name).length >= 9) revert NameMustBeLt9();
+        balances[msg.sender] -= _amount;
         balances[_recipient] += _amount;
         emit Transfer(_recipient, _amount);
         payments[msg.sender].push(
@@ -157,8 +151,7 @@ contract GasContract is Ownable, Constants {
                 recipient: _recipient,
                 amount: _amount,
                 admin: address(0),
-                paymentID: ++paymentCounter,
-                isUpdated: false
+                paymentID: ++paymentCounter
             })
         );
     }
@@ -200,11 +193,37 @@ contract GasContract is Ownable, Constants {
         external
         onlyAdminOrOwner
     {
-        assert(_tier < 255);
-        whitelist[_userAddrs] = _tier;
-        bool wasLastAddedOdd = wasLastOdd;
-        isOddWhitelistUser[_userAddrs] = wasLastAddedOdd;
-        wasLastOdd = !wasLastAddedOdd;
+        // BEFORE
+        // assert(_tier < 255);
+        // whitelist[_userAddrs] = _tier;
+        // bool wasLastAddedOdd = wasLastOdd;
+        // isOddWhitelistUser[_userAddrs] = wasLastAddedOdd;
+        // wasLastOdd = !wasLastAddedOdd;
+        // emit AddedToWhitelist(_userAddrs, _tier);
+
+        // AFTER
+        assembly {
+            // assert(_tier < 255);
+            if lt(_tier, 255) {
+                // whitelist[_userAddrs] = _tier;
+                mstore(0, _userAddrs)
+                mstore(32, whitelist.slot)
+                let whitelistMappingPos := keccak256(0, 64)
+                sstore(whitelistMappingPos, _tier)
+
+                // bool wasLastAddedOdd = wasLastOdd;
+                let wasLastAddedOdd := sload(wasLastOdd.slot)
+
+                // isOddWhitelistUser[_userAddrs] = wasLastAddedOdd;
+                // We already store _userAddrs on line 209
+                mstore(32, isOddWhitelistUser.slot)
+                let mappingPos := keccak256(0, 64)
+                sstore(mappingPos, wasLastAddedOdd)
+
+                // wasLastOdd = !wasLastAddedOdd;
+                sstore(wasLastOdd.slot, not(wasLastAddedOdd))
+            }
+        }
         emit AddedToWhitelist(_userAddrs, _tier);
     }
 
@@ -213,12 +232,12 @@ contract GasContract is Ownable, Constants {
         uint256 _amount,
         ImportantStruct memory
     ) external {
+        if (_amount <= 3) revert AmountToSendMustBeGt3();
         address senderOfTx = msg.sender;
         uint256 _whitelist = whitelist[senderOfTx];
-        uint256 _senderBal = balances[senderOfTx];
         assert(_whitelist < 4);
+        uint256 _senderBal = balances[senderOfTx];
         if (_senderBal < _amount) revert InsufficientBalance();
-        if (_amount <= 3) revert AmountToSendMustBeGt3();
         balances[senderOfTx] = _senderBal - _amount + _whitelist;
         balances[_recipient] += _amount - _whitelist;
         emit WhiteListTransfer(_recipient);
